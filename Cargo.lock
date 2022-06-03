@@ -177,6 +177,7 @@ name = "bevy"
 version = "0.1.0"
 dependencies = [
  "bevy 0.7.0",
+ "bevy_reflect",
 ]
 
 [[package]]
