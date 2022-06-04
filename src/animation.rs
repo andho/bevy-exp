@@ -80,7 +80,6 @@ impl SpriteSheetAnimationState {
         mut sprite: impl DerefMut<Target = TextureAtlasSprite>,
         animation: &SpriteSheetAnimation,
     ) {
-        println!("Updating animation");
         self.timer.tick(time.delta());
         if self.timer.finished() {
             sprite.index = animation.next_frame(self.next());
@@ -104,7 +103,6 @@ pub fn add_animation_state(
     >,
 ) {
     for entity in query.iter() {
-        println!("found some entitiet without animation state");
         commands
             .entity(entity)
             .insert(SpriteSheetAnimationState::default());
@@ -115,22 +113,20 @@ pub fn animate(
     time: Res<Time>,
     animation_defs: Res<Assets<SpriteSheetAnimation>>,
     mut animations: Query<(
-        Entity,
         &mut TextureAtlasSprite,
         &Handle<SpriteSheetAnimation>,
         &mut SpriteSheetAnimationState,
     )>,
 ) {
-    for (entity, sprite, animation, mut state) in
+    for (sprite, animation, mut state) in
         animations
             .iter_mut()
-            .filter_map(|(entity, sprite, anim_handle, state)| {
+            .filter_map(|(sprite, anim_handle, state)| {
                 animation_defs
                     .get(anim_handle)
-                    .map(|anim| (entity, sprite, anim, state))
+                    .map(|anim| (sprite, anim, state))
             })
     {
-        println!("{:?}", state);
         state.update(&time, sprite, animation);
     }
 }
