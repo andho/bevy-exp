@@ -1,8 +1,16 @@
-use bevy::core::{Time, Timer};
+use bevy::core::Timer;
 use bevy::ecs::component::Component;
-use bevy::prelude::Res;
+use bevy::prelude::{CoreStage, Plugin, SystemSet};
 use bevy::reflect::TypeUuid;
-use bevy::sprite::TextureAtlasSprite;
+use bevy::{
+    core::Time,
+    prelude::{
+        AddAsset, App, AssetServer, Assets, Commands, Entity, Handle, OrthographicCameraBundle,
+        Query, Res, ResMut, SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3, With, Without,
+    },
+    sprite::TextureAtlasSprite,
+    DefaultPlugins,
+};
 use std::ops::DerefMut;
 
 #[derive(Debug, Clone, TypeUuid)]
@@ -43,7 +51,7 @@ impl SpriteSheetAnimation {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct SpriteSheetAnimationState {
     current_frame: usize,
     timer: Timer,
@@ -72,6 +80,7 @@ impl SpriteSheetAnimationState {
         mut sprite: impl DerefMut<Target = TextureAtlasSprite>,
         animation: &SpriteSheetAnimation,
     ) {
+        println!("Updating animation");
         self.timer.tick(time.delta());
         if self.timer.finished() {
             sprite.index = animation.next_frame(self.next());
@@ -81,5 +90,66 @@ impl SpriteSheetAnimationState {
     fn next(&mut self) -> usize {
         self.current_frame += 1;
         self.current_frame
+    }
+}
+
+pub fn add_animation_state(
+    mut commands: Commands,
+    query: Query<
+        Entity,
+        (
+            With<Handle<SpriteSheetAnimation>>,
+            Without<SpriteSheetAnimationState>,
+        ),
+    >,
+) {
+    for entity in query.iter() {
+        println!("found some entitiet without animation state");
+        commands
+            .entity(entity)
+            .insert(SpriteSheetAnimationState::default());
+    }
+}
+
+pub fn animate(
+    time: Res<Time>,
+    animation_defs: Res<Assets<SpriteSheetAnimation>>,
+    mut animations: Query<(
+        Entity,
+        &mut TextureAtlasSprite,
+        &Handle<SpriteSheetAnimation>,
+        &mut SpriteSheetAnimationState,
+    )>,
+) {
+    for (entity, sprite, animation, mut state) in
+        animations
+            .iter_mut()
+            .filter_map(|(entity, sprite, anim_handle, state)| {
+                animation_defs
+                    .get(anim_handle)
+                    .map(|anim| (entity, sprite, anim, state))
+            })
+    {
+        println!("{:?}", state);
+        state.update(&time, sprite, animation);
+    }
+}
+
+pub fn maintenance_systems() -> SystemSet {
+    SystemSet::new().with_system(add_animation_state)
+}
+
+pub fn post_update_systems() -> SystemSet {
+    SystemSet::new().with_system(animate)
+}
+
+#[derive(Default)]
+pub struct AnimationPlugin;
+
+impl Plugin for AnimationPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_asset::<SpriteSheetAnimation>()
+            .add_system_set_to_stage(CoreStage::PreUpdate, maintenance_systems())
+            .add_system_set_to_stage(CoreStage::Update, post_update_systems());
     }
 }
