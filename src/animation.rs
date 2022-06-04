@@ -2,14 +2,10 @@ use bevy::core::Timer;
 use bevy::ecs::component::Component;
 use bevy::prelude::{CoreStage, Plugin, SystemSet};
 use bevy::reflect::TypeUuid;
+use bevy::sprite::TextureAtlasSprite;
 use bevy::{
     core::Time,
-    prelude::{
-        AddAsset, App, AssetServer, Assets, Commands, Entity, Handle, OrthographicCameraBundle,
-        Query, Res, ResMut, SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3, With, Without,
-    },
-    sprite::TextureAtlasSprite,
-    DefaultPlugins,
+    prelude::{AddAsset, App, Assets, Commands, Entity, Handle, Query, Res, Without},
 };
 use std::ops::DerefMut;
 
@@ -67,7 +63,7 @@ impl Default for SpriteSheetAnimationState {
 }
 
 impl SpriteSheetAnimationState {
-    fn new(animation: SpriteSheetAnimation) -> Self {
+    fn new(animation: &SpriteSheetAnimation) -> Self {
         SpriteSheetAnimationState {
             timer: Timer::from_seconds(1.0 / animation.fps as f32, true),
             ..Default::default()
@@ -94,18 +90,14 @@ impl SpriteSheetAnimationState {
 
 pub fn add_animation_state(
     mut commands: Commands,
-    query: Query<
-        Entity,
-        (
-            With<Handle<SpriteSheetAnimation>>,
-            Without<SpriteSheetAnimationState>,
-        ),
-    >,
+    animation_defs: Res<Assets<SpriteSheetAnimation>>,
+    query: Query<(Entity, &Handle<SpriteSheetAnimation>), (Without<SpriteSheetAnimationState>,)>,
 ) {
-    for entity in query.iter() {
+    for (entity, anim_handle) in query.iter() {
+        let animation = animation_defs.get(anim_handle).unwrap();
         commands
             .entity(entity)
-            .insert(SpriteSheetAnimationState::default());
+            .insert(SpriteSheetAnimationState::new(animation));
     }
 }
 

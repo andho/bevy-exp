@@ -1,7 +1,7 @@
 use std::{fmt::Display, hash::Hash};
 
 use bevy::{
-    prelude::{Commands, Component, Entity, Handle, Query, With, Without},
+    prelude::{Commands, Component, Entity, Handle, Query},
     utils::HashMap,
 };
 
@@ -32,7 +32,7 @@ impl<T: AnimationKey, U> Animator<T, U> {
 
 pub fn animation_selection<T: AnimationKey + 'static, U: 'static + Component + Clone>(
     mut commands: Commands,
-    query: Query<(Entity, &Animator<T, U>, &U), Without<Handle<SpriteSheetAnimation>>>,
+    query: Query<(Entity, &Animator<T, U>, &U)>,
 ) {
     for (entity, animator, anim_data) in query.iter() {
         let animation = animator.select(anim_data.clone());

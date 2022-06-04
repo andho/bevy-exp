@@ -9,13 +9,13 @@ use animator::{animation_selection, AnimationKey, Animator};
 use bevy::{
     diagnostic::LogDiagnosticsPlugin,
     prelude::{
-        App, AssetServer, Assets, Commands, Component, OrthographicCameraBundle, Res, ResMut,
-        SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3,
+        App, AssetServer, Assets, Commands, Component, OrthographicCameraBundle, Query, Res,
+        ResMut, SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3,
     },
     utils::HashMap,
     DefaultPlugins,
 };
-use input::{MovementPlugin, Player};
+use input::{MovementPlugin, Player, Velocity};
 
 fn main() {
     App::new()
@@ -26,6 +26,7 @@ fn main() {
         .add_startup_system(setup)
         .add_system(bevy::input::system::exit_on_esc_system)
         .add_system(animation_selection::<Animations, AnimationData>)
+        .add_system(update_animation_data)
         .run();
 }
 
@@ -51,11 +52,16 @@ impl Default for Animations {
     }
 }
 
-#[derive(Component, Clone)]
-struct AnimationData;
+#[derive(Component, Clone, Default, Debug)]
+struct AnimationData {
+    moving: bool,
+}
 
-fn animation_selector(_data: AnimationData) -> Animations {
-    Animations::Walk
+fn animation_selector(data: AnimationData) -> Animations {
+    match data.moving {
+        true => Animations::Walk,
+        false => Animations::Idle,
+    }
 }
 
 fn setup(
@@ -91,6 +97,16 @@ fn setup(
             ..Default::default()
         })
         .insert(animator)
-        .insert(AnimationData {})
+        .insert(AnimationData::default())
         .insert(Player {});
+}
+
+fn update_animation_data(mut query: Query<(&Velocity, &mut AnimationData)>) {
+    for (velocity, mut anim_data) in query.iter_mut() {
+        if velocity.length() > 0.0 {
+            anim_data.moving = true;
+        } else {
+            anim_data.moving = false;
+        }
+    }
 }

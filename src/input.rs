@@ -14,7 +14,13 @@ const SPEED: f32 = 100.0;
 pub struct Player {}
 
 #[derive(Component)]
-struct Velocity(Vec2);
+pub struct Velocity(Vec2);
+
+impl Velocity {
+    pub fn length(&self) -> f32 {
+        self.0.length()
+    }
+}
 
 fn player_controller(
     mut commands: Commands,
