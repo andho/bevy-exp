@@ -1,5 +1,6 @@
 mod animation;
 mod animator;
+mod input;
 
 use core::fmt;
 
@@ -14,11 +15,13 @@ use bevy::{
     utils::HashMap,
     DefaultPlugins,
 };
+use input::{MovementPlugin, Player};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(AnimationPlugin)
+        .add_plugin(MovementPlugin)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_startup_system(setup)
         .add_system(bevy::input::system::exit_on_esc_system)
@@ -26,7 +29,6 @@ fn main() {
         .run();
 }
 
-//const SPEED: f32 = 100.0;
 const ANIMATION_FPS: u8 = 12;
 
 #[derive(Hash, PartialEq, Eq, Debug)]
@@ -89,5 +91,6 @@ fn setup(
             ..Default::default()
         })
         .insert(animator)
-        .insert(AnimationData {});
+        .insert(AnimationData {})
+        .insert(Player {});
 }
