@@ -2,6 +2,7 @@ mod animation;
 mod animator;
 mod camera;
 mod input;
+mod mouse;
 
 use core::fmt;
 
@@ -18,6 +19,7 @@ use bevy::{
 };
 use camera::CameraPlugin;
 use input::{MovementPlugin, Player, Velocity};
+use mouse::MousePlugin;
 
 fn main() {
     App::new()
@@ -25,6 +27,7 @@ fn main() {
         .add_plugin(AnimationPlugin)
         .add_plugin(MovementPlugin)
         .add_plugin(CameraPlugin)
+        .add_plugin(MousePlugin)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_startup_system(setup)
         .add_system(bevy::input::system::exit_on_esc_system)
