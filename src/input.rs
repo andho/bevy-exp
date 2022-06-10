@@ -1,3 +1,5 @@
+use std::{fmt::Debug, hash::Hash};
+
 use bevy::{
     core::Time,
     input::Input,
@@ -7,6 +9,7 @@ use bevy::{
         Transform, With,
     },
 };
+use iyes_loopless::prelude::IntoConditionalSystem;
 
 const SPEED: f32 = 100.0;
 
@@ -63,12 +66,22 @@ fn movement_systems() -> SystemSet {
         .with_system(player_controller)
         .with_system(player_movement)
 }
+pub trait MovementState: Debug + Clone + Copy + PartialEq + Eq + Hash + Sync + Send {}
 
 #[derive(Default)]
-pub struct MovementPlugin;
+pub struct MovementPlugin<T: MovementState> {
+    state: T,
+}
 
-impl Plugin for MovementPlugin {
+impl<T: 'static + MovementState> MovementPlugin<T> {
+    pub fn new(state: T) -> Self {
+        Self { state }
+    }
+}
+
+impl<T: 'static + MovementState> Plugin for MovementPlugin<T> {
     fn build(&self, app: &mut App) {
-        app.add_system_set_to_stage(CoreStage::Update, movement_systems());
+        app.add_system(player_controller.run_in_state(self.state))
+            .add_system(player_movement.run_in_state(self.state));
     }
 }

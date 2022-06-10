@@ -1,4 +1,5 @@
 use std::f32::consts::{FRAC_PI_2, PI};
+use std::{fmt::Debug, hash::Hash};
 
 use bevy::{
     input::mouse::MouseMotion,
@@ -10,6 +11,7 @@ use bevy::{
     render::camera::RenderTarget,
     window::{Window, Windows},
 };
+use iyes_loopless::prelude::IntoConditionalSystem;
 
 use crate::input::Player;
 
@@ -63,11 +65,21 @@ fn mouse_look(
     }
 }
 
-#[derive(Default)]
-pub struct MousePlugin;
+pub trait MouseState: Debug + Clone + Copy + PartialEq + Eq + Hash + Sync + Send {}
 
-impl Plugin for MousePlugin {
+#[derive(Default)]
+pub struct MousePlugin<T: MouseState> {
+    state: T,
+}
+
+impl<T: 'static + MouseState> MousePlugin<T> {
+    pub fn new(state: T) -> Self {
+        Self { state }
+    }
+}
+
+impl<T: 'static + MouseState> Plugin for MousePlugin<T> {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_system_set_to_stage(CoreStage::Update, SystemSet::new().with_system(mouse_look));
+        app.add_system(mouse_look.run_in_state(self.state));
     }
 }

@@ -1,12 +1,15 @@
+use std::{fmt::Debug, hash::Hash};
+
 use bevy::core::Timer;
 use bevy::ecs::component::Component;
-use bevy::prelude::{CoreStage, Plugin, SystemSet};
+use bevy::prelude::{CoreStage, ParallelSystemDescriptorCoercion, Plugin, SystemSet};
 use bevy::reflect::TypeUuid;
 use bevy::sprite::TextureAtlasSprite;
 use bevy::{
     core::Time,
     prelude::{AddAsset, App, Assets, Commands, Entity, Handle, Query, Res, Without},
 };
+use iyes_loopless::prelude::{AppLooplessStateExt, IntoConditionalSystem};
 use std::ops::DerefMut;
 
 #[derive(Debug, Clone, TypeUuid)]
@@ -123,21 +126,29 @@ pub fn animate(
     }
 }
 
-pub fn maintenance_systems() -> SystemSet {
-    SystemSet::new().with_system(add_animation_state)
-}
-
-pub fn post_update_systems() -> SystemSet {
-    SystemSet::new().with_system(animate)
-}
+pub trait AnimationState: Debug + Clone + Copy + PartialEq + Eq + Hash + Sync + Send {}
 
 #[derive(Default)]
-pub struct AnimationPlugin;
+pub struct AnimationPlugin<T: AnimationState> {
+    state: T,
+}
 
-impl Plugin for AnimationPlugin {
+impl<T: 'static + AnimationState> AnimationPlugin<T> {
+    pub fn new(state: T) -> Self {
+        Self { state }
+    }
+}
+
+impl<T: 'static + AnimationState> Plugin for AnimationPlugin<T> {
     fn build(&self, app: &mut App) {
+        println!("{}", std::any::type_name::<Self>());
+        //println!("{:}", self.state);
         app.add_asset::<SpriteSheetAnimation>()
-            .add_system_set_to_stage(CoreStage::PreUpdate, maintenance_systems())
-            .add_system_set_to_stage(CoreStage::Update, post_update_systems());
+            .add_system(
+                add_animation_state
+                    .run_in_state(self.state)
+                    .before("animate"),
+            )
+            .add_system(animate.run_in_state(self.state).label("animate"));
     }
 }

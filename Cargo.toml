@@ -1,5 +1,5 @@
 [package]
-name = "bevy"
+name = "goo"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.7.0", features = ["dynamic", "wayland"] }
 bevy_reflect = { version = "0.7.0" }
+iyes_loopless = { version = "0.5" }

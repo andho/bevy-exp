@@ -1,7 +1,10 @@
+use std::{fmt::Debug, hash::Hash};
+
 use bevy::{
     math::Vec2,
     prelude::{Camera, CoreStage, Local, ParamSet, Plugin, Query, SystemSet, Transform, With},
 };
+use iyes_loopless::prelude::IntoConditionalSystem;
 
 use crate::input::Player;
 
@@ -24,14 +27,21 @@ fn camera_movement(
     }
 }
 
-#[derive(Default)]
-pub struct CameraPlugin;
+pub trait CameraState: Debug + Clone + Copy + PartialEq + Eq + Hash + Sync + Send {}
 
-impl Plugin for CameraPlugin {
+#[derive(Default)]
+pub struct CameraPlugin<T: CameraState> {
+    state: T,
+}
+
+impl<T: 'static + CameraState> CameraPlugin<T> {
+    pub fn new(state: T) -> Self {
+        Self { state }
+    }
+}
+
+impl<T: 'static + CameraState> Plugin for CameraPlugin<T> {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_system_set_to_stage(
-            CoreStage::Update,
-            SystemSet::new().with_system(camera_movement),
-        );
+        app.add_system(camera_movement.run_in_state(self.state));
     }
 }

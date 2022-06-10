@@ -174,14 +174,6 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bevy"
-version = "0.1.0"
-dependencies = [
- "bevy 0.7.0",
- "bevy_reflect",
-]
-
-[[package]]
-name = "bevy"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fce306d40a111309ee61d4626efbafccdd46bb80657122c38061fa7264c08e4"
@@ -1536,6 +1528,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "goo"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_reflect",
+ "iyes_loopless",
+]
+
+[[package]]
 name = "gpu-alloc"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1716,6 +1717,18 @@ name = "itoa"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
+
+[[package]]
+name = "iyes_loopless"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e37cbe1fdc9aeed2d5ec064d3306ba4318723c20c5b0e4662d03c49fedcd491b"
+dependencies = [
+ "bevy_app",
+ "bevy_core",
+ "bevy_ecs",
+ "bevy_utils",
+]
 
 [[package]]
 name = "jni"
