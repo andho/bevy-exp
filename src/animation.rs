@@ -141,8 +141,6 @@ impl<T: 'static + AnimationState> AnimationPlugin<T> {
 
 impl<T: 'static + AnimationState> Plugin for AnimationPlugin<T> {
     fn build(&self, app: &mut App) {
-        println!("{}", std::any::type_name::<Self>());
-        //println!("{:}", self.state);
         app.add_asset::<SpriteSheetAnimation>()
             .add_system(
                 add_animation_state

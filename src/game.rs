@@ -3,6 +3,7 @@ use crate::{
     animator::{animation_selection, AnimationKey, Animator},
     camera::{CameraPlugin, CameraState},
     input::{MovementPlugin, MovementState, Player, Velocity},
+    loading::{LoadingPlugin, LoadingState1},
     mouse::{MousePlugin, MouseState},
 };
 use bevy::{
@@ -15,6 +16,7 @@ use bevy::{
 };
 use core::fmt;
 use iyes_loopless::prelude::{AppLooplessStateExt, ConditionSet, IntoConditionalSystem};
+use iyes_progress::ProgressPlugin;
 
 const ANIMATION_FPS: u8 = 12;
 
@@ -114,6 +116,7 @@ impl AnimationState for GameState {}
 impl MovementState for GameState {}
 impl CameraState for GameState {}
 impl MouseState for GameState {}
+impl LoadingState1 for GameState {}
 
 #[derive(Default)]
 pub struct GooMainPlugin;
@@ -121,6 +124,7 @@ pub struct GooMainPlugin;
 impl Plugin for GooMainPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_loopless_state(GameState::Loading)
+            .add_plugin(LoadingPlugin::new(GameState::Loading, GameState::InGame))
             .add_plugin(AnimationPlugin::new(GameState::InGame))
             .add_plugin(MovementPlugin::new(GameState::InGame))
             .add_plugin(CameraPlugin::new(GameState::InGame))

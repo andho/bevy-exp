@@ -254,6 +254,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_asset_loader"
+version = "0.11.0"
+source = "git+https://github.com/NiklasEi/bevy_asset_loader?branch=main#74a18d44b06f901c1849ce5d9b7f2a291dd5215c"
+dependencies = [
+ "bevy",
+ "bevy_asset_loader_derive",
+ "iyes_loopless",
+ "iyes_progress",
+]
+
+[[package]]
+name = "bevy_asset_loader_derive"
+version = "0.11.0"
+source = "git+https://github.com/NiklasEi/bevy_asset_loader?branch=main#74a18d44b06f901c1849ce5d9b7f2a291dd5215c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "bevy_audio"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1532,8 +1553,10 @@ name = "goo"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_asset_loader",
  "bevy_reflect",
  "iyes_loopless",
+ "iyes_progress",
 ]
 
 [[package]]
@@ -1728,6 +1751,17 @@ dependencies = [
  "bevy_core",
  "bevy_ecs",
  "bevy_utils",
+]
+
+[[package]]
+name = "iyes_progress"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46cae0743794e8b757a4c17be94b24d600edb0c3d409bc5a2e7993ccc98d8130"
+dependencies = [
+ "bevy_app",
+ "bevy_ecs",
+ "iyes_loopless",
 ]
 
 [[package]]

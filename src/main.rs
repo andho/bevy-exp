@@ -3,6 +3,7 @@ mod animator;
 mod camera;
 mod game;
 mod input;
+mod loading;
 mod mouse;
 
 use bevy::{prelude::App, DefaultPlugins};
