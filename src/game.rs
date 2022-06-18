@@ -7,16 +7,21 @@ use crate::{
     mouse::{MousePlugin, MouseState},
 };
 use bevy::{
+    core::Name,
+    hierarchy::BuildChildren,
+    math::Quat,
     prelude::{
-        AssetServer, Assets, Commands, Component, OrthographicCameraBundle, Plugin, Query, Res,
-        ResMut, SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3,
+        info, AssetServer, Assets, Commands, Component, OrthographicCameraBundle, Plugin, Query,
+        Res, ResMut, SpriteSheetBundle, TextureAtlas, Transform, Vec2, Vec3,
     },
     sprite::SpriteBundle,
+    transform::TransformBundle,
     utils::HashMap,
 };
 use core::fmt;
 use iyes_loopless::prelude::{AppLooplessStateExt, ConditionSet, IntoConditionalSystem};
 use iyes_progress::ProgressPlugin;
+use std::f32::consts::TAU;
 
 const ANIMATION_FPS: u8 = 12;
 
@@ -69,12 +74,14 @@ fn setup(
         ANIMATION_FPS,
     ));
 
+    let player = Name::new("Player");
     let animator = Animator::new(
         HashMap::from_iter([
             (Animations::Idle, anim_idle_handle),
             (Animations::Walk, anim_walk_handle),
         ]),
         animation_selector,
+        player.clone(),
     );
 
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -86,14 +93,21 @@ fn setup(
     });
 
     commands
-        .spawn_bundle(SpriteSheetBundle {
-            texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(1.0)),
-            ..Default::default()
-        })
+        .spawn_bundle(TransformBundle::from_transform(
+            Transform::from_translation(Vec3::splat(0.)),
+        ))
+        .insert(Player {})
         .insert(animator)
         .insert(AnimationData::default())
-        .insert(Player {});
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(SpriteSheetBundle {
+                    texture_atlas: texture_atlas_handle,
+                    transform: Transform::from_rotation(Quat::from_rotation_z(0.25 * TAU)),
+                    ..Default::default()
+                })
+                .insert(player.clone());
+        });
 }
 
 fn update_animation_data(mut query: Query<(&Velocity, &mut AnimationData)>) {

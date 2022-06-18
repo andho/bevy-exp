@@ -55,9 +55,7 @@ fn mouse_look(
             let v = mouse_pos_2d - transform_2d;
             let b = v.normalize();
             let a = Vec2::new(1.0, 0.0);
-            let new_rotation = Quat::from_rotation_arc_2d(a, b)
-                .normalize()
-                .mul_quat(Quat::from_rotation_z(FRAC_PI_2).normalize());
+            let new_rotation = Quat::from_rotation_arc_2d(a, b).normalize();
 
             let old_rotation = transform.rotation;
             transform.rotation = old_rotation.lerp(new_rotation, 0.2);
